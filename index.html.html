@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自行车零件售后数据分析报告</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#333}
+.header{background:linear-gradient(135deg,#1a237e 0%,#283593 50%,#3949ab 100%);color:#fff;padding:40px 30px;text-align:center}
+.header h1{font-size:28px;margin-bottom:8px}
+.header p{font-size:14px;opacity:0.85}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:20px 0}
+.kpi-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;border-top:4px solid #3949ab}
+.kpi-card.green{border-top-color:#43a047}
+.kpi-card.orange{border-top-color:#fb8c00}
+.kpi-card.red{border-top-color:#e53935}
+.kpi-card.teal{border-top-color:#00897b}
+.kpi-card.purple{border-top-color:#8e24aa}
+.kpi-value{font-size:30px;font-weight:700;color:#1a237e;margin:8px 0}
+.kpi-card.green .kpi-value{color:#2e7d32}
+.kpi-card.orange .kpi-value{color:#ef6c00}
+.kpi-card.red .kpi-value{color:#c62828}
+.kpi-card.teal .kpi-value{color:#00695c}
+.kpi-card.purple .kpi-value{color:#6a1b9a}
+.kpi-label{font-size:13px;color:#666}
+.kpi-sub{font-size:11px;color:#999;margin-top:4px}
+.section{background:#fff;border-radius:12px;padding:24px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.section-title{font-size:20px;font-weight:600;color:#1a237e;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e8eaf6;display:flex;align-items:center;gap:8px}
+.section-title .icon{width:8px;height:24px;background:linear-gradient(180deg,#3949ab,#1a237e);border-radius:4px}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chart-row.full{grid-template-columns:1fr}
+@media(max-width:768px){.chart-row{grid-template-columns:1fr}}
+.footer{text-align:center;padding:30px;color:#999;font-size:13px}
+.note{background:#e3f2fd;border-left:4px solid #2196f3;padding:12px 16px;border-radius:6px;margin:16px 0;font-size:13px;color:#1565c0;line-height:1.6}
+.insight-box{background:linear-gradient(135deg,#fff8e1,#fff3e0);border-left:4px solid #ff9800;padding:16px 20px;border-radius:8px;margin:12px 0;font-size:13px;color:#e65100;line-height:1.7}
+.insight-box strong{color:#bf360c}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+table th{background:#3949ab;color:#fff;padding:10px;text-align:left;font-weight:600}
+table td{padding:8px 10px;border-bottom:1px solid #e8eaf6}
+table tr:nth-child(even){background:#f5f7fa}
+table tr:hover{background:#e8eaf6}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge.high{background:#ffebee;color:#c62828}
+.badge.mid{background:#fff3e0;color:#e65100}
+.badge.low{background:#e8f5e9;color:#2e7d32}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>🚲 自行车零件售后数据分析报告</h1>
+<p>数据周期：2024年4月 — 2026年8月 | 覆盖美国49个州 | 共1,138笔售后记录</p>
+</div>
+
+<div class="container">
+
+<!-- KPI Cards -->
+<div class="kpi-row">
+<div class="kpi-card"><div class="kpi-label">售后总件数</div><div class="kpi-value">1,138</div><div class="kpi-sub">2024.04 - 2026.08</div></div>
+<div class="kpi-card green"><div class="kpi-label">售后总费用</div><div class="kpi-value">$19,093</div><div class="kpi-sub">快递$15,808 + 操作$3,285</div></div>
+<div class="kpi-card orange"><div class="kpi-label">平均单件费用</div><div class="kpi-value">$16.78</div><div class="kpi-sub">含运费+操作费</div></div>
+<div class="kpi-card teal"><div class="kpi-label">覆盖州数</div><div class="kpi-value">49</div><div class="kpi-sub">仅缺1个州</div></div>
+<div class="kpi-card purple"><div class="kpi-label">复购客户</div><div class="kpi-value">118</div><div class="kpi-sub">复购率 14.4%</div></div>
+<div class="kpi-card red"><div class="kpi-label">多零件订单</div><div class="kpi-value">216</div><div class="kpi-sub">占比 19.0%</div></div>
+</div>
+
+<!-- Business Insights Summary -->
+<div class="section">
+<div class="section-title"><span class="icon"></span>核心商业洞察</div>
+<div class="insight-box">
+<strong>1. 地理集中度高：</strong>前5个州（FL、CA、TX、NY、IL）贡献了32.8%的售后量，前10个州占比51.5%。建议在佛州、加州、德州设立区域备件仓，降低物流成本。
+</div>
+<div class="insight-box">
+<strong>2. 成本结构：</strong>快递费占总成本的82.8%（$15,808），操作费仅占17.2%（$3,285）。优化物流是降本核心。USPS均价$13.04 vs FEDEX均价$30.32，重件走FEDEX、轻件走USPS的策略已正确执行。
+</div>
+<div class="insight-box">
+<strong>3. 高频失效零件：</strong>充电器(108次)、轮圈胶(105次)、钥匙(84次)为售后TOP3。充电器和钥匙丢失率高，建议出厂标配备用件；轮圈组件常整组更换，可推出预套装。
+</div>
+<div class="insight-box">
+<strong>4. 关联失效模式：</strong>"内胎+轮圈胶"53次、"花鼓+车圈+辐条"52次同时更换，说明轮组整体失效是主要模式，建议推出完整轮组替换包。
+</div>
+<div class="insight-box">
+<strong>5. 区域差异：</strong>南部地区售后量最高（344件，均费$20.41），西部地区均费最低（$17.59）。夏威夷单件均费$73.6，远高于本土，建议设置太平洋区域特殊运费策略。
+</div>
+</div>
+
+<!-- US Map: Shipments by State -->
+<div class="section">
+<div class="section-title"><span class="icon"></span>美国各州售后件数分布图</div>
+<div id="mapShipments" style="width:100%;height:600px"></div>
+<div class="note">颜色由浅绿到深蓝渐变，表示售后件数从少到多。将鼠标悬停在州上可查看详细数据。</div>
+</div>
+
+<!-- US Map: Total Cost by State -->
+<div class="section">
+<div class="section-title"><span class="icon"></span>美国各州售后总费用分布图</div>
+<div id="mapCosts" style="width:100%;height:600px"></div>
+<div class="note">颜色由浅绿到深蓝渐变，表示售后总费用从低到高。</div>
+</div>
+
+<!-- Top States + Part Pie -->
+<div class="chart-row">
+<div class="section">
+<div class="section-title"><span class="icon"></span>售后件数 Top 15 州</div>
+<div id="topStatesBar" style="width:100%;height:450px"></div>
+</div>
+<div class="section">
+<div class="section-title"><span class="icon"></span>售后零件类别分布</div>
+<div id="partPie" style="width:100%;height:450px"></div>
+</div>
+</div>
+
+<!-- Geographic Concentration Pareto + Cost Composition -->
+<div class="chart-row">
+<div class="section">
+<div class="section-title"><span class="icon"></span>各州售后件数帕累托图</div>
+<div id="paretoChart" style="width:100%;height:450px"></div>
+<div class="note">前10个州占比51.5%，前20个州占比73.7%，售后高度集中在人口大州。</div>
+</div>
+<div class="section">
+<div class="section-title"><span class="icon"></span>费用结构分析</div>
+<div id="costComposition" style="width:100%;height:450px"></div>
+<div class="note">快递费占比82.8%，是成本控制的核心方向。</div>
+</div>
+</div>
+
+<!-- Monthly Trends -->
+<div class="section">
+<div class="section-title"><span class="icon"></span>月度售后件数与费用趋势</div>
+<div id="monthlyTrend" style="width:100%;height:450px"></div>
+</div>
+
+<!-- Avg Cost per Shipment Trend + Seasonal Pattern -->
+<div class="chart-row">
+<div class="section">
+<div class="section-title"><span class="icon"></span>月度平均单件费用趋势</div>
+<div id="avgCostTrend" style="width:100%;height:450px"></div>
+</div>
+<div class="section">
+<div class="section-title"><span class="icon"></span>季节性分布（按月份汇总）</div>
+<div id="seasonalChart" style="width:100%;height:450px"></div>
+</div>
+</div>
+
+<!-- Carrier Comparison + Bike Models -->
+<div class="chart-row">
+<div class="section">
+<div class="section-title"><span class="icon"></span>快递公司对比分析</div>
+<div id="carrierChart" style="width:100%;height:450px"></div>
+</div>
+<div class="section">
+<div class="section-title"><span class="icon"></span>自行车型号售后分布</div>
+<div id="bikeModelChart" style="width:100%;height:450px"></div>
+</div>
+</div>
+
+<!-- Part Categories Bar + Part Cost Analysis -->
+<div class="section">
+<div class="section-title"><span class="icon"></span>售后零件类别排行（Top 20）</div>
+<div id="partBar" style="width:100%;height:500px"></div>
+</div>
+
+<div class="section">
+<div class="section-title"><span class="icon"></span>零件类别费用分析（总费用Top 15）</div>
+<div id="partCostChart" style="width:100%;height:500px"></div>
+<div class="note">前轮组均费$37.19、花鼓$38.13、车圈$38.57为最贵的售后零件类别，属高价值重件。</div>
+</div>
+
+<!-- State x Part Heatmap -->
+<div class="section">
+<div class="section-title"><span class="icon"></span>Top 10 州零件类别热力图</div>
+<div id="statePartHeatmap" style="width:100%;height:500px"></div>
+</div>
+
+<!-- Regional Analysis + State Avg Cost -->
+<div class="chart-row">
+<div class="section">
+<div class="section-title"><span class="icon"></span>美国四大区域售后对比</div>
+<div id="regionalChart" style="width:100%;height:450px"></div>
+</div>
+<div class="section">
+<div class="section-title"><span class="icon"></span>单件均费最高Top 15州</div>
+<div id="stateAvgCostChart" style="width:100%;height:450px"></div>
+</div>
+</div>
+
+<!-- Carrier by Part Type + Part Co-occurrence -->
+<div class="chart-row">
+<div class="section">
+<div class="section-title"><span class="icon"></span>快递方式与零件类别关系</div>
+<div id="carrierPartChart" style="width:100%;height:450px"></div>
+</div>
+<div class="section">
+<div class="section-title"><span class="icon"></span>关联失效零件Top 15</div>
+<div id="cooccurrenceChart" style="width:100%;height:450px"></div>
+</div>
+</div>
+
+<!-- Customer Repeat + Multi-part -->
+<div class="chart-row">
+<div class="section">
+<div class="section-title"><span class="icon"></span>客户复购分析</div>
+<div id="customerLoyaltyChart" style="width:100%;height:450px"></div>
+<div class="note">821位客户中，118位为复购客户（复购率14.4%），复购订单共281笔。复购客户是核心用户群，需重点关注产品体验。</div>
+</div>
+<div class="section">
+<div class="section-title"><span class="icon"></span>单笔零件数量分布</div>
+<div id="partsPerShipChart" style="width:100%;height:450px"></div>
+</div>
+</div>
+
+<!-- Quarterly Trend -->
+<div class="section">
+<div class="section-title"><span class="icon"></span>季度售后趋势</div>
+<div id="quarterlyChart" style="width:100%;height:450px"></div>
+<div class="note">每年Q3为售后高峰季（2025-Q3达180件），与骑行旺季一致，建议Q2提前备货。</div>
+</div>
+
+<!-- High Value Shipments Table -->
+<div class="section">
+<div class="section-title"><span class="icon"></span>高费用售后订单Top 20</div>
+<table>
+<thead><tr><th>日期</th><th>州</th><th>快递</th><th>费用($)</th><th>型号</th><th>零件</th></tr></thead>
+<tbody id="highValueTable"></tbody>
+</table>
+</div>
+
+</div>
+
+<div class="footer">
+<p>自行车零件售后数据分析报告（脱敏版） | 已移除所有客户个人信息 | 生成日期：2026-08-20</p>
+</div>
+
+<script>
+const analysis = {"state_shipments": {"FL": 86, "CA": 76, "TX": 55, "NY": 49, "IL": 48, "PA": 41, "IN": 39, "OH": 35, "WI": 34, "VA": 29, "CT": 29, "GA": 25, "MI": 24, "NC": 23, "AR": 22, "MN": 22, "MD": 21, "NJ": 21, "CO": 20, "MA": 17, "MO": 16, "IA": 15, "TN": 15, "NE": 14, "KS": 12, "AZ": 12, "WV": 11, "SC": 11, "OR": 11, "LA": 11, "WA": 11, "AL": 10, "NV": 10, "KY": 9, "OK": 9, "MT": 8, "UT": 8, "NM": 6, "ME": 6, "ID": 6, "NH": 5, "DE": 5, "AK": 4, "HI": 4, "ND": 3, "WY": 3, "VT": 2, "MS": 2, "SD": 1}, "state_costs": {"AK": {"total": 78.42, "avg": 19.6, "count": 4}, "AL": {"total": 211.84, "avg": 21.18, "count": 10}, "AR": {"total": 490.3, "avg": 22.29, "count": 22}, "AZ": {"total": 171.79, "avg": 14.32, "count": 12}, "CA": {"total": 1266.7, "avg": 16.67, "count": 76}, "CO": {"total": 319.44, "avg": 15.97, "count": 20}, "CT": {"total": 445.2, "avg": 15.35, "count": 29}, "DE": {"total": 115.02, "avg": 23.0, "count": 5}, "FL": {"total": 1731.1, "avg": 20.13, "count": 86}, "GA": {"total": 393.2, "avg": 15.73, "count": 25}, "HI": {"total": 294.4, "avg": 73.6, "count": 4}, "IA": {"total": 261.55, "avg": 17.44, "count": 15}, "ID": {"total": 64.1, "avg": 10.68, "count": 6}, "IL": {"total": 905.99, "avg": 18.87, "count": 48}, "IN": {"total": 821.99, "avg": 21.08, "count": 39}, "KS": {"total": 167.03, "avg": 13.92, "count": 12}, "KY": {"total": 236.31, "avg": 26.26, "count": 9}, "LA": {"total": 274.2, "avg": 24.93, "count": 11}, "MA": {"total": 374.61, "avg": 22.04, "count": 17}, "MD": {"total": 540.6, "avg": 25.74, "count": 21}, "ME": {"total": 99.9, "avg": 16.65, "count": 6}, "MI": {"total": 454.05, "avg": 18.92, "count": 24}, "MN": {"total": 343.75, "avg": 15.62, "count": 22}, "MO": {"total": 260.12, "avg": 16.26, "count": 16}, "MS": {"total": 46.79, "avg": 23.4, "count": 2}, "MT": {"total": 155.7, "avg": 19.46, "count": 8}, "NC": {"total": 426.91, "avg": 18.56, "count": 23}, "ND": {"total": 38.64, "avg": 12.88, "count": 3}, "NE": {"total": 170.59, "avg": 12.18, "count": 14}, "NH": {"total": 81.29, "avg": 16.26, "count": 5}, "NJ": {"total": 395.76, "avg": 18.85, "count": 21}, "NM": {"total": 110.36, "avg": 18.39, "count": 6}, "NV": {"total": 153.75, "avg": 15.38, "count": 10}, "NY": {"total": 1043.71, "avg": 21.3, "count": 49}, "OH": {"total": 607.68, "avg": 17.36, "count": 35}, "OK": {"total": 137.59, "avg": 15.29, "count": 9}, "OR": {"total": 190.13, "avg": 17.28, "count": 11}, "PA": {"total": 759.81, "avg": 18.53, "count": 41}, "SC": {"total": 223.69, "avg": 20.34, "count": 11}, "SD": {"total": 43.38, "avg": 43.38, "count": 1}, "TN": {"total": 331.2, "avg": 22.08, "count": 15}, "TX": {"total": 1123.16, "avg": 20.42, "count": 55}, "UT": {"total": 110.24, "avg": 13.78, "count": 8}, "VA": {"total": 556.45, "avg": 19.19, "count": 29}, "VT": {"total": 28.92, "avg": 14.46, "count": 2}, "WA": {"total": 190.29, "avg": 17.3, "count": 11}, "WI": {"total": 558.99, "avg": 16.44, "count": 34}, "WV": {"total": 181.76, "avg": 16.52, "count": 11}, "WY": {"total": 43.03, "avg": 14.34, "count": 3}}, "part_categories": {"Charger": 108, "Rim Tape": 105, "Keys": 84, "Inner Tube": 77, "Tool Kit": 66, "Battery": 64, "Cable": 64, "Front Wheel Set": 63, "Controller": 54, "Hub": 53, "Rim": 52, "Spokes": 52, "Crankset": 51, "Pedals": 46, "Rear Wheel Set": 46, "Front Fork": 45, "Tire Set": 45, "Display": 42, "Front Brake": 35, "Stem": 33, "Front Light": 32, "Kickstand": 30, "Reflector": 27, "Hardware": 27, "Hub Quick Release": 26, "Brake Rotor": 26, "Tire": 25, "Front Fender": 24, "Rear Brake": 22, "Motor": 22, "Rear Derailleur": 19, "Freewheel": 17, "Bottom Bracket": 13, "Rear Reflector": 13, "Wheel Reflector": 13, "Chain": 8, "Handlebar": 8, "Sensor": 7, "Rear Fender": 6, "Seat Post QR": 6, "Frame Components": 6, "Headset": 6, "Front Derailleur": 5, "Seat Post": 4, "Frame": 4, "Front Wheel": 4, "Brake Pads": 2, "Rear Wheel": 2, "Brake Cable": 1}, "monthly_shipments": {"2024-04": 3, "2024-05": 24, "2024-06": 24, "2024-07": 46, "2024-08": 51, "2024-09": 40, "2024-10": 30, "2024-11": 25, "2024-12": 18, "2025-01": 26, "2025-02": 38, "2025-03": 27, "2025-04": 29, "2025-05": 48, "2025-06": 48, "2025-07": 58, "2025-08": 72, "2025-09": 50, "2025-10": 56, "2025-11": 42, "2025-12": 41, "2026-01": 31, "2026-02": 23, "2026-03": 38, "2026-04": 42, "2026-05": 50, "2026-06": 62, "2026-07": 66, "2026-08": 30}, "monthly_costs": {"2024-04": 44.57, "2024-05": 666.08, "2024-06": 663.26, "2024-07": 1122.18, "2024-08": 1244.05, "2024-09": 642.06, "2024-10": 507.72, "2024-11": 430.58, "2024-12": 317.77, "2025-01": 642.25, "2025-02": 616.25, "2025-03": 358.87, "2025-04": 572.17, "2025-05": 707.05, "2025-06": 889.26, "2025-07": 985.45, "2025-08": 1121.09, "2025-09": 842.59, "2025-10": 783.85, "2025-11": 713.76, "2025-12": 758.8, "2026-01": 529.96, "2026-02": 317.09, "2026-03": 435.32, "2026-04": 560.25, "2026-05": 655.93, "2026-06": 760.73, "2026-07": 795.53, "2026-08": 408.17}, "carrier_counts": {"USPS": 601, "FEDEX": 351, "UPS": 1}, "carrier_costs": {"FEDEX": {"total": 10842.66, "avg": 30.89, "count": 351}, "UPS": {"total": 25.95, "avg": 25.95, "count": 1}, "USPS": {"total": 7834.7, "avg": 13.04, "count": 601}}, "bike_models": {"22CB2702": 316, "22MB2702": 297, "22AMG7002": 155, "23CF2001": 87, "23FR2602": 80, "22ASG7002": 65, "23HY7003": 40, "23CC2001": 21, "23OZM2901": 20, "23HY7001": 19, "23OZ2401": 9, "23HY7002": 8, "23CF2002": 4, "23OZL2901": 4, "23OZ2402": 4, "23OZS2902": 2, "23OZL2902": 2, "23OZS2901": 2, "23FR2603": 1}, "overall": {"total_shipments": 1138, "total_cost": 19092.64, "avg_cost": 16.78, "total_shipping_cost": 15807.64, "total_operation_fee": 3285.0, "unique_states": 49, "unique_parts": 49, "date_range": "2024-04-26 ~ 2026-08-19", "states_with_data": 956, "states_without_data": 182}, "part_by_state": {"FL": {"Charger": 14, "Rim Tape": 8, "Keys": 8, "Controller": 7, "Crankset": 6, "Battery": 6, "Cable": 6, "Rear Wheel Set": 5, "Reflector": 5, "Front Light": 5}, "CA": {"Rim Tape": 11, "Front Wheel Set": 7, "Front Fork": 6, "Inner Tube": 6, "Cable": 6, "Battery": 5, "Charger": 5, "Rim": 5, "Tire Set": 5, "Spokes": 5}, "TX": {"Rear Wheel Set": 7, "Rim Tape": 7, "Rim": 6, "Spokes": 6, "Hub": 6, "Motor": 6, "Front Fork": 4, "Inner Tube": 4, "Front Wheel Set": 3, "Battery": 3}, "NY": {"Inner Tube": 7, "Rim Tape": 6, "Battery": 5, "Crankset": 3, "Pedals": 3, "Front Wheel Set": 3, "Tire": 3, "Rear Wheel Set": 3, "Keys": 3, "Reflector": 2}, "IL": {"Inner Tube": 7, "Charger": 6, "Rim Tape": 6, "Keys": 5, "Front Wheel Set": 3, "Front Light": 3, "Tire": 2, "Front Fork": 2, "Rear Wheel Set": 2, "Crankset": 2}, "PA": {"Front Wheel Set": 5, "Front Brake": 4, "Keys": 4, "Charger": 3, "Tool Kit": 2, "Front Light": 2, "Kickstand": 2, "Cable": 2, "Pedals": 2, "Crankset": 2}, "IN": {"Battery": 6, "Charger": 4, "Tool Kit": 4, "Front Wheel Set": 4, "Rim": 4, "Tire Set": 4, "Spokes": 4, "Hub": 4, "Rim Tape": 4, "Display": 3}, "OH": {"Charger": 7, "Tool Kit": 5, "Battery": 3, "Reflector": 3, "Front Fork": 3, "Crankset": 2, "Controller": 2, "Pedals": 2, "Keys": 2, "Front Wheel": 1}, "WI": {"Charger": 6, "Battery": 5, "Controller": 4, "Hub Quick Release": 2, "Tool Kit": 2, "Front Fork": 2, "Inner Tube": 2, "Keys": 2, "Front Wheel Set": 1, "Front Fender": 1}, "VA": {"Charger": 7, "Kickstand": 2, "Reflector": 2, "Rear Fender": 2, "Tool Kit": 2, "Hardware": 2, "Keys": 2, "Cable": 2, "Rear Wheel Set": 1, "Rear Derailleur": 1}}, "cost_composition": {"shipping": 15807.64, "operation": 3285.0, "shipping_pct": 82.8, "operation_pct": 17.2}, "part_cost_analysis": {"Rim Tape": {"total_cost": 2646.08, "count": 105, "avg_cost": 25.2, "avg_shipping": 22.23}, "Front Wheel Set": {"total_cost": 2342.94, "count": 63, "avg_cost": 37.19, "avg_shipping": 33.76}, "Hub": {"total_cost": 2020.84, "count": 53, "avg_cost": 38.13, "avg_shipping": 35.19}, "Rim": {"total_cost": 2005.39, "count": 52, "avg_cost": 38.57, "avg_shipping": 35.62}, "Spokes": {"total_cost": 2005.39, "count": 52, "avg_cost": 38.57, "avg_shipping": 35.62}, "Battery": {"total_cost": 1777.93, "count": 64, "avg_cost": 27.78, "avg_shipping": 24.59}, "Rear Wheel Set": {"total_cost": 1703.1, "count": 46, "avg_cost": 37.02, "avg_shipping": 34.09}, "Tire Set": {"total_cost": 1663.27, "count": 45, "avg_cost": 36.96, "avg_shipping": 34.03}, "Charger": {"total_cost": 1549.88, "count": 108, "avg_cost": 14.35, "avg_shipping": 11.35}, "Front Fork": {"total_cost": 1099.73, "count": 45, "avg_cost": 24.44, "avg_shipping": 21.44}, "Inner Tube": {"total_cost": 948.66, "count": 77, "avg_cost": 12.32, "avg_shipping": 9.36}, "Tool Kit": {"total_cost": 864.42, "count": 66, "avg_cost": 13.1, "avg_shipping": 10.37}, "Motor": {"total_cost": 847.89, "count": 22, "avg_cost": 38.54, "avg_shipping": 35.68}, "Cable": {"total_cost": 801.57, "count": 64, "avg_cost": 12.52, "avg_shipping": 9.81}, "Crankset": {"total_cost": 762.91, "count": 51, "avg_cost": 14.96, "avg_shipping": 12.19}}, "geo_concentration": {"top5_states": ["FL", "CA", "TX", "NY", "IL"], "top5_count": 314, "top5_pct": 32.8, "top10_states": ["FL", "CA", "TX", "NY", "IL", "PA", "IN", "OH", "WI", "VA"], "top10_count": 492, "top10_pct": 51.5, "top20_pct": 74.9}, "state_avg_cost": {"HI": 73.6, "SD": 43.38, "KY": 26.26, "MD": 25.74, "LA": 24.93, "MS": 23.39, "DE": 23.0, "AR": 22.29, "TN": 22.08, "MA": 22.04, "NY": 21.3, "AL": 21.18, "IN": 21.08, "TX": 20.42, "SC": 20.34}, "quarterly": {"2024-Q2": {"ships": 51, "cost": 1373.91}, "2024-Q3": {"ships": 137, "cost": 3008.29}, "2024-Q4": {"ships": 73, "cost": 1256.07}, "2025-Q1": {"ships": 91, "cost": 1617.37}, "2025-Q2": {"ships": 125, "cost": 2168.48}, "2025-Q3": {"ships": 180, "cost": 2949.13}, "2025-Q4": {"ships": 139, "cost": 2256.41}, "2026-Q1": {"ships": 92, "cost": 1282.37}, "2026-Q2": {"ships": 154, "cost": 1976.91}, "2026-Q3": {"ships": 96, "cost": 1203.7}}, "carrier_by_part": {"Charger": {"USPS": 92, "FEDEX": 7}, "Rim Tape": {"FEDEX": 56, "USPS": 39}, "Keys": {"USPS": 72, "FEDEX": 1}, "Inner Tube": {"FEDEX": 11, "USPS": 48}, "Tool Kit": {"USPS": 47, "FEDEX": 9}, "Battery": {"FEDEX": 60, "USPS": 1}, "Cable": {"USPS": 51, "FEDEX": 5}, "Front Wheel Set": {"FEDEX": 61, "USPS": 1}, "Controller": {"USPS": 52, "FEDEX": 2}, "Hub": {"FEDEX": 50, "USPS": 2}, "Rim": {"FEDEX": 50, "USPS": 1}, "Spokes": {"FEDEX": 50, "USPS": 1}}, "customer_loyalty": {"total_customers": 821, "repeat_customers": 118, "repeat_rate": 14.4, "repeat_shipments": 281}, "multi_part_shipments": {"count": 216, "pct": 19.0, "avg_parts_per_shipment": 1.4}, "parts_per_shipment_dist": {"0": 33, "1": 889, "2": 117, "3": 46, "4": 1, "5": 1, "6": 37, "7": 14}, "seasonal": {"1": 57, "2": 61, "3": 65, "4": 74, "5": 122, "6": 134, "7": 170, "8": 153, "9": 90, "10": 86, "11": 67, "12": 59}, "monthly_avg_cost": {"2024-04": 14.86, "2024-05": 27.75, "2024-06": 27.64, "2024-07": 24.4, "2024-08": 24.39, "2024-09": 16.05, "2024-10": 16.92, "2024-11": 17.22, "2024-12": 17.65, "2025-01": 24.7, "2025-02": 16.22, "2025-03": 13.29, "2025-04": 19.73, "2025-05": 14.73, "2025-06": 18.53, "2025-07": 16.99, "2025-08": 15.57, "2025-09": 16.85, "2025-10": 14.0, "2025-11": 16.99, "2025-12": 18.51, "2026-01": 17.1, "2026-02": 13.79, "2026-03": 11.46, "2026-04": 13.34, "2026-05": 13.12, "2026-06": 12.27, "2026-07": 12.05, "2026-08": 13.61}, "high_value_shipments": [{"date": "2026-06-15", "state": "N/A", "carrier": "FEDEX", "cost": 173.8, "parts": ["Rear Wheel Set", "Rim", "Tire Set", "Spokes", "Hub", "Rim Tape", "Motor"], "model": "22CB2702"}, {"date": "2025-01-06", "state": "HI", "carrier": "USPS", "cost": 137.37, "parts": ["Rear Wheel Set", "Rim", "Spokes", "Hub", "Rim Tape", "Motor"], "model": "22MB2702"}, {"date": "2025-04-07", "state": "HI", "carrier": "USPS", "cost": 130.19, "parts": ["Handlebar"], "model": "22ASG7002"}, {"date": "2024-06-24", "state": "NY", "carrier": "FEDEX", "cost": 75.2, "parts": ["Tire"], "model": "22AMG7002"}, {"date": "2024-08-13", "state": "FL", "carrier": "FEDEX", "cost": 68.74, "parts": ["Pedals"], "model": "22AMG7002"}, {"date": "2024-08-29", "state": "NY", "carrier": "FEDEX", "cost": 68.06, "parts": ["Front Wheel Set"], "model": "22MB2702"}, {"date": "2026-07-30", "state": "IN", "carrier": "FEDEX", "cost": 66.01, "parts": ["Rim", "Front Wheel Set", "Tire Set", "Spokes", "Hub", "Rim Tape"], "model": "23OZL2902"}, {"date": "2024-06-19", "state": "FL", "carrier": "FEDEX", "cost": 65.41, "parts": ["Rear Wheel Set"], "model": "22AMG7002"}, {"date": "2024-08-01", "state": "VA", "carrier": "FEDEX", "cost": 61.6, "parts": ["Rear Wheel Set"], "model": "22AMG7002"}, {"date": "2024-07-30", "state": "IA", "carrier": "FEDEX", "cost": 61.33, "parts": ["Kickstand"], "model": "22ASG7002"}, {"date": "2025-11-17", "state": "CT", "carrier": "FEDEX", "cost": 60.91, "parts": ["Rim", "Front Wheel Set", "Tire Set", "Spokes", "Hub", "Rim Tape"], "model": "23OZL2902"}, {"date": "2024-07-27", "state": "IL", "carrier": "FEDEX", "cost": 58.69, "parts": ["Rear Wheel Set"], "model": "22AMG7002"}, {"date": "2025-10-16", "state": "FL", "carrier": "FEDEX", "cost": 56.51, "parts": ["Rim", "Front Wheel Set", "Tire Set", "Spokes", "Hub", "Rim Tape"], "model": "22MB2702"}, {"date": "2024-08-17", "state": "NC", "carrier": "FEDEX", "cost": 55.14, "parts": ["Front Wheel Set"], "model": "22AMG7002"}, {"date": "2024-05-08", "state": "MD", "carrier": "FEDEX", "cost": 54.98, "parts": ["Front Wheel Set"], "model": "22AMG7002"}, {"date": "2024-05-10", "state": "TN", "carrier": "FEDEX", "cost": 54.98, "parts": ["Front Wheel Set"], "model": "22AMG7002"}, {"date": "2025-02-25", "state": "IL", "carrier": "FEDEX", "cost": 54.7, "parts": ["Front Brake"], "model": "22AMG7002"}, {"date": "2025-05-13", "state": "PA", "carrier": "FEDEX", "cost": 52.64, "parts": [], "model": "22AMG7002"}, {"date": "2025-02-26", "state": "LA", "carrier": "FEDEX", "cost": 51.94, "parts": ["Front Brake"], "model": "22ASG7002"}, {"date": "2025-06-23", "state": "NY", "carrier": "FEDEX", "cost": 51.84, "parts": ["Rear Wheel Set"], "model": "22MB2702"}], "part_cooccurrence": [{"parts": ["Inner Tube", "Rim Tape"], "count": 53}, {"parts": ["Rim", "Spokes"], "count": 52}, {"parts": ["Hub", "Rim"], "count": 52}, {"parts": ["Rim", "Rim Tape"], "count": 52}, {"parts": ["Hub", "Spokes"], "count": 52}, {"parts": ["Rim Tape", "Spokes"], "count": 52}, {"parts": ["Hub", "Rim Tape"], "count": 52}, {"parts": ["Rim", "Tire Set"], "count": 45}, {"parts": ["Spokes", "Tire Set"], "count": 45}, {"parts": ["Hub", "Tire Set"], "count": 45}, {"parts": ["Rim Tape", "Tire Set"], "count": 45}, {"parts": ["Front Wheel Set", "Rim Tape"], "count": 27}, {"parts": ["Rear Wheel Set", "Rim"], "count": 26}, {"parts": ["Rear Wheel Set", "Spokes"], "count": 26}, {"parts": ["Hub", "Rear Wheel Set"], "count": 26}], "model_analysis": {"22CB2702": 316, "22MB2702": 297, "22AMG7002": 155, "23CF2001": 87, "23FR2602": 80, "22ASG7002": 65, "23HY7003": 40, "23CC2001": 21, "23OZM2901": 20, "23HY7001": 19}, "heavy_parts": {"Front Wheel Set": 61, "Battery": 60, "Rim Tape": 56, "Rim": 50, "Spokes": 50, "Hub": 50, "Tire Set": 44, "Rear Wheel Set": 43, "Front Fork": 37, "Tire": 18}, "light_parts": {"Charger": 92, "Keys": 72, "Controller": 52, "Cable": 51, "Inner Tube": 48, "Tool Kit": 47, "Rim Tape": 39, "Display": 34, "Stem": 30, "Crankset": 25}, "regional": {"Midwest": {"ships": 263, "cost": 4633.76, "avg_cost": 17.62}, "Northeast": {"ships": 170, "cost": 3229.2, "avg_cost": 19.0}, "South": {"ships": 344, "cost": 7020.12, "avg_cost": 20.41}, "West": {"ships": 179, "cost": 3148.35, "avg_cost": 17.59}}};
+
+const stateAbbr = Object.keys(analysis.state_shipments);
+const stateValues = Object.values(analysis.state_shipments);
+const stateNames = stateAbbr.map(a => a + ': ' + analysis.state_shipments[a] + '件');
+
+const greenBlueScale = [
+    [0, '#e8f5e9'], [0.1, '#c8e6c9'], [0.2, '#a5d6a7'],
+    [0.3, '#81c784'], [0.4, '#66bb6a'], [0.5, '#4dd0e1'],
+    [0.6, '#26c6da'], [0.7, '#26a69a'], [0.8, '#42a5f5'],
+    [0.9, '#1e88e5'], [1, '#1565c0']
+];
+
+// 1. US Map - Shipments
+Plotly.newPlot('mapShipments', [{
+    type: 'choropleth', locationmode: 'USA-states', locations: stateAbbr,
+    z: stateValues, text: stateNames, colorscale: greenBlueScale,
+    colorbar: {title: '件数', thickness: 15, len: 0.8},
+    marker: {line: {color: '#fff', width: 1}},
+}], {
+    title: {text: '美国各州售后件数分布', font: {size: 16}},
+    geo: {scope: 'usa', showlakes: true, lakecolor: '#e3f2fd'},
+    margin: {l: 20, r: 20, t: 50, b: 20}
+}, {displayModeBar: true, responsive: true});
+
+// 2. US Map - Costs
+const costAbbr = Object.keys(analysis.state_costs);
+const costValues = costAbbr.map(s => analysis.state_costs[s].total);
+const costText = costAbbr.map(s => s + ': $' + analysis.state_costs[s].total.toFixed(2) + ' (' + analysis.state_costs[s].count + '件, 均$' + analysis.state_costs[s].avg.toFixed(2) + ')');
+
+Plotly.newPlot('mapCosts', [{
+    type: 'choropleth', locationmode: 'USA-states', locations: costAbbr,
+    z: costValues, text: costText, colorscale: greenBlueScale,
+    colorbar: {title: '费用($)', thickness: 15, len: 0.8},
+    marker: {line: {color: '#fff', width: 1}},
+}], {
+    title: {text: '美国各州售后总费用分布', font: {size: 16}},
+    geo: {scope: 'usa', showlakes: true, lakecolor: '#e3f2fd'},
+    margin: {l: 20, r: 20, t: 50, b: 20}
+}, {displayModeBar: true, responsive: true});
+
+// 3. Top States Bar
+const topStates = Object.entries(analysis.state_shipments).sort((a,b) => b[1]-a[1]).slice(0, 15);
+Plotly.newPlot('topStatesBar', [{
+    type: 'bar', x: topStates.map(s => s[0]), y: topStates.map(s => s[1]),
+    marker: {color: topStates.map((s,i) => 'rgb(' + (29+10*i) + ',' + (100-i*5) + ',' + (240-i*10) + ')')},
+    text: topStates.map(s => s[1] + '件'), textposition: 'outside',
+}], {
+    title: {text: '售后件数最多的15个州', font: {size: 14}},
+    xaxis: {title: '州'}, yaxis: {title: '件数'},
+    margin: {l: 50, r: 20, t: 40, b: 60}
+}, {responsive: true});
+
+// 4. Part Pie
+const topParts = Object.entries(analysis.part_categories).sort((a,b) => b[1]-a[1]).slice(0, 12);
+const otherParts = Object.entries(analysis.part_categories).sort((a,b) => b[1]-a[1]).slice(12);
+Plotly.newPlot('partPie', [{
+    type: 'pie', labels: topParts.map(p => p[0]).concat(['其他']),
+    values: topParts.map(p => p[1]).concat([otherParts.reduce((s,p) => s+p[1], 0)]),
+    hole: 0.4, textinfo: 'label+percent', textposition: 'outside',
+    marker: {colors: ['#1565c0','#42a5f5','#26c6da','#66bb6a','#a5d6a7','#ff9800','#ffb74d','#f57c00','#e53935','#ef5350','#ab47bc','#7e57c2','#bdbdbd']},
+}], {title: {text: '售后零件类别占比', font: {size: 14}}, margin: {l: 20, r: 20, t: 40, b: 20}, showlegend: false}, {responsive: true});
+
+// 5. Pareto Chart
+const allStates = Object.entries(analysis.state_shipments).sort((a,b) => b[1]-a[1]);
+const paretoLabels = allStates.map(s => s[0]);
+const paretoValues = allStates.map(s => s[1]);
+const paretoCum = [];
+let cumSum = 0;
+const totalShips = paretoValues.reduce((a,b) => a+b, 0);
+paretoValues.forEach(v => { cumSum += v; paretoCum.push(cumSum/totalShips*100); });
+
+Plotly.newPlot('paretoChart', [
+    {type: 'bar', x: paretoLabels, y: paretoValues, name: '件数', marker: {color: '#42a5f5'}},
+    {type: 'scatter', mode: 'lines+markers', x: paretoLabels, y: paretoCum, name: '累计占比(%)',
+     line: {color: '#e53935', width: 2}, yaxis: 'y2', marker: {size: 5}}
+], {
+    title: {text: '帕累托分析：州集中度', font: {size: 14}},
+    xaxis: {title: '州（按件数降序）', tickangle: -45},
+    yaxis: {title: '件数'},
+    yaxis2: {title: '累计占比(%)', side: 'right', overlaying: 'y', range: [0, 105]},
+    margin: {l: 50, r: 60, t: 40, b: 80},
+    legend: {x: 0.4, y: 0.05}
+}, {responsive: true});
+
+// 6. Cost Composition
+Plotly.newPlot('costComposition', [{
+    type: 'pie', labels: ['快递费', '操作费'],
+    values: [analysis.cost_composition.shipping, analysis.cost_composition.operation],
+    hole: 0.5, textinfo: 'label+percent+value',
+    marker: {colors: ['#1565c0', '#ff9800']},
+    texttemplate: '%{label}<br>$%{value}<br>(%{percent})',
+}], {
+    title: {text: '总费用结构 ($' + analysis.overall.total_cost + ')', font: {size: 14}},
+    margin: {l: 20, r: 20, t: 50, b: 20}, showlegend: false
+}, {responsive: true});
+
+// 7. Monthly Trend
+const months = Object.keys(analysis.monthly_shipments).sort();
+Plotly.newPlot('monthlyTrend', [
+    {type: 'bar', x: months, y: months.map(m => analysis.monthly_shipments[m]), name: '件数', marker: {color: '#42a5f5'}, yaxis: 'y'},
+    {type: 'scatter', mode: 'lines+markers', x: months, y: months.map(m => analysis.monthly_costs[m]), name: '费用($)', line: {color: '#e53935', width: 2}, marker: {size: 6}, yaxis: 'y2'}
+], {
+    title: {text: '月度售后趋势（2024.04 - 2026.08）', font: {size: 14}},
+    xaxis: {title: '月份', tickangle: -45}, yaxis: {title: '件数', side: 'left'},
+    yaxis2: {title: '费用($)', side: 'right', overlaying: 'y'},
+    margin: {l: 60, r: 60, t: 40, b: 80}, legend: {x: 0.01, y: 1.05, orientation: 'h'}
+}, {responsive: true});
+
+// 8. Avg Cost Trend
+const avgMonths = Object.keys(analysis.monthly_avg_cost).sort();
+Plotly.newPlot('avgCostTrend', [{
+    type: 'scatter', mode: 'lines+markers', fill: 'tozeroy',
+    x: avgMonths, y: avgMonths.map(m => analysis.monthly_avg_cost[m]),
+    line: {color: '#7b1fa2', width: 2}, fillcolor: 'rgba(123,31,162,0.1)',
+    marker: {size: 6}, name: '平均单件费用',
+}], {
+    title: {text: '月度平均单件费用（$）', font: {size: 14}},
+    xaxis: {title: '月份', tickangle: -45}, yaxis: {title: '平均费用($)'},
+    margin: {l: 60, r: 20, t: 40, b: 80}
+}, {responsive: true});
+
+// 9. Seasonal
+const seasonLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+Plotly.newPlot('seasonalChart', [{
+    type: 'bar', x: seasonLabels, y: seasonLabels.map((_,i) => analysis.seasonal[i+1] || 0),
+    marker: {color: seasonLabels.map((_,i) => {
+        const v = analysis.seasonal[i+1] || 0;
+        if (v > 300) return '#1565c0';
+        if (v > 200) return '#42a5f5';
+        return '#90caf9';
+    })},
+    text: seasonLabels.map((_,i) => (analysis.seasonal[i+1] || 0) + '件'),
+    textposition: 'outside',
+}], {
+    title: {text: '各月份售后量分布（跨年汇总）', font: {size: 14}},
+    xaxis: {title: '月份'}, yaxis: {title: '件数'},
+    margin: {l: 50, r: 20, t: 40, b: 50},
+    shapes: [{type: 'rect', x0: 5.5, x1: 8.5, y0: 0, y1: 1, yref: 'paper', fillcolor: 'rgba(255,152,0,0.08)', line: {width: 0}}],
+    annotations: [{x: 7, y: 1.02, yref: 'paper', text: '旺季', showarrow: false, font: {color: '#e65100', size: 12}}]
+}, {responsive: true});
+
+// 10. Carrier Comparison
+const carrierCounts = [601, 245+106];
+const carrierAvg = [13.04, (7822.68+3019.98)/(245+106)];
+Plotly.newPlot('carrierChart', [
+    {type: 'bar', x: ['USPS', 'FEDEX'], y: carrierCounts, name: '件数', marker: {color: ['#4caf50', '#2196f3']}, text: carrierCounts.map(c => c + '件'), textposition: 'outside', yaxis: 'y'},
+    {type: 'bar', x: ['USPS', 'FEDEX'], y: carrierAvg, name: '平均费用($)', marker: {color: ['#81c784', '#64b5f6']}, text: carrierAvg.map(c => '$' + c.toFixed(2)), textposition: 'outside', yaxis: 'y2', offsetgroup: 1}
+], {
+    title: {text: 'USPS vs FEDEX 快递对比', font: {size: 14}}, barmode: 'group',
+    xaxis: {title: '快递公司'}, yaxis: {title: '件数', side: 'left'},
+    yaxis2: {title: '平均费用($)', side: 'right', overlaying: 'y'},
+    margin: {l: 50, r: 60, t: 40, b: 50}, legend: {x: 0.2, y: 1.1, orientation: 'h'}
+}, {responsive: true});
+
+// 11. Bike Models
+const bikeModels = Object.entries(analysis.bike_models).sort((a,b) => b[1]-a[1]).slice(0, 10);
+Plotly.newPlot('bikeModelChart', [{
+    type: 'bar', x: bikeModels.map(b => b[0]), y: bikeModels.map(b => b[1]),
+    marker: {color: bikeModels.map((b,i) => 'hsl(' + (200+i*20) + ',70%,' + (70-i*3) + '%)')},
+    text: bikeModels.map(b => b[1] + '次'), textposition: 'outside',
+}], {
+    title: {text: '自行车型号售后频次 Top 10', font: {size: 14}},
+    xaxis: {title: '型号', tickangle: -30}, yaxis: {title: '售后次数'},
+    margin: {l: 50, r: 20, t: 40, b: 80}
+}, {responsive: true});
+
+// 12. Part Bar (Top 20)
+const allParts = Object.entries(analysis.part_categories).sort((a,b) => b[1]-a[1]).slice(0, 20);
+Plotly.newPlot('partBar', [{
+    type: 'bar', x: allParts.map(p => p[1]), y: allParts.map(p => p[0]), orientation: 'h',
+    marker: {color: allParts.map((p,i) => 'rgb(' + (20+i*8) + ',' + (120-i*4) + ',' + (220-i*8) + ')')},
+    text: allParts.map(p => p[1]), textposition: 'outside',
+}], {
+    title: {text: '售后零件类别频次排行', font: {size: 14}},
+    xaxis: {title: '频次'}, yaxis: {title: '', autorange: 'reversed'},
+    margin: {l: 130, r: 50, t: 40, b: 50}
+}, {responsive: true});
+
+// 13. Part Cost Analysis
+const pca = Object.entries(analysis.part_cost_analysis).sort((a,b) => b[1].total_cost - a[1].total_cost);
+Plotly.newPlot('partCostChart', [
+    {type: 'bar', x: pca.map(p => p[0]), y: pca.map(p => p[1].total_cost), name: '总费用($)', marker: {color: '#1565c0'}},
+    {type: 'scatter', mode: 'lines+markers', x: pca.map(p => p[0]), y: pca.map(p => p[1].avg_cost), name: '平均费用($)', line: {color: '#e53935', width: 2}, marker: {size: 7}, yaxis: 'y2'}
+], {
+    title: {text: '零件类别费用分析', font: {size: 14}},
+    xaxis: {title: '零件类别', tickangle: -30}, yaxis: {title: '总费用($)'},
+    yaxis2: {title: '平均费用($)', side: 'right', overlaying: 'y'},
+    margin: {l: 50, r: 60, t: 40, b: 80}, legend: {x: 0.3, y: 1.1, orientation: 'h'}
+}, {responsive: true});
+
+// 14. State x Part Heatmap
+const top10States = Object.entries(analysis.state_shipments).sort((a,b) => b[1]-a[1]).slice(0, 10).map(s => s[0]);
+const top10Parts = Object.entries(analysis.part_categories).sort((a,b) => b[1]-a[1]).slice(0, 10).map(p => p[0]);
+const heatZ = top10States.map(state => {
+    const sd = analysis.part_by_state[state] || {};
+    return top10Parts.map(part => sd[part] || 0);
+});
+Plotly.newPlot('statePartHeatmap', [{
+    type: 'heatmap', z: heatZ, x: top10Parts, y: top10States,
+    colorscale: [[0,'#f3e5f5'],[0.25,'#ce93d8'],[0.5,'#ab47bc'],[0.75,'#7b1fa2'],[1,'#4a148c']],
+    text: heatZ.map(row => row.map(v => v || '')), texttemplate: '%{text}', textfont: {size: 12, color: '#fff'}
+}], {
+    title: {text: '各州主要售后零件分布', font: {size: 14}},
+    xaxis: {title: '零件类别', tickangle: -30}, yaxis: {title: '州'},
+    margin: {l: 60, r: 20, t: 40, b: 80}
+}, {responsive: true});
+
+// 15. Regional
+const regNames = Object.keys(analysis.regional);
+Plotly.newPlot('regionalChart', [
+    {type: 'bar', x: regNames, y: regNames.map(r => analysis.regional[r].ships), name: '件数', marker: {color: '#42a5f5'}, yaxis: 'y'},
+    {type: 'scatter', mode: 'lines+markers', x: regNames, y: regNames.map(r => analysis.regional[r].avg_cost), name: '平均费用($)', line: {color: '#e53935', width: 2}, marker: {size: 8}, yaxis: 'y2'}
+], {
+    title: {text: '四大区域售后对比', font: {size: 14}},
+    xaxis: {title: '区域'}, yaxis: {title: '件数'},
+    yaxis2: {title: '平均费用($)', side: 'right', overlaying: 'y'},
+    margin: {l: 50, r: 60, t: 40, b: 50}, legend: {x: 0.2, y: 1.1, orientation: 'h'}
+}, {responsive: true});
+
+// 16. State Avg Cost
+const sac = Object.entries(analysis.state_avg_cost).sort((a,b) => b[1]-a[1]);
+Plotly.newPlot('stateAvgCostChart', [{
+    type: 'bar', x: sac.map(s => s[0]), y: sac.map(s => s[1]), orientation: 'h',
+    marker: {color: sac.map(s => s[1] > 40 ? '#c62828' : s[1] > 25 ? '#ef6c00' : '#1565c0')},
+    text: sac.map(s => '$' + s[1]), textposition: 'outside',
+}], {
+    title: {text: '单件平均费用最高的州', font: {size: 14}},
+    xaxis: {title: '平均费用($)'}, yaxis: {title: '', autorange: 'reversed'},
+    margin: {l: 50, r: 50, t: 40, b: 50}
+}, {responsive: true});
+
+// 17. Carrier by Part
+const cbp = Object.entries(analysis.carrier_by_part);
+Plotly.newPlot('carrierPartChart', [
+    {type: 'bar', x: cbp.map(p => p[0]), y: cbp.map(p => p[1].USPS || 0), name: 'USPS', marker: {color: '#4caf50'}},
+    {type: 'bar', x: cbp.map(p => p[0]), y: cbp.map(p => p[1].FEDEX || 0), name: 'FEDEX', marker: {color: '#2196f3'}}
+], {
+    title: {text: '各零件的快递方式选择', font: {size: 14}}, barmode: 'stack',
+    xaxis: {title: '零件类别', tickangle: -30}, yaxis: {title: '件数'},
+    margin: {l: 50, r: 20, t: 40, b: 80}, legend: {x: 0.35, y: 1.1, orientation: 'h'}
+}, {responsive: true});
+
+// 18. Co-occurrence
+const cooc = analysis.part_cooccurrence;
+Plotly.newPlot('cooccurrenceChart', [{
+    type: 'bar', x: cooc.map(c => c.parts.join(' + ')), y: cooc.map(c => c.count), orientation: 'v',
+    marker: {color: cooc.map((c,i) => 'hsl(' + (280+i*15) + ',60%,' + (65-i*2) + '%)')},
+    text: cooc.map(c => c.count + '次'), textposition: 'outside',
+}], {
+    title: {text: '常见关联失效零件组合', font: {size: 14}},
+    xaxis: {title: '零件组合', tickangle: -35}, yaxis: {title: '次数'},
+    margin: {l: 50, r: 20, t: 40, b: 100}
+}, {responsive: true});
+
+// 19. Customer Loyalty (desensitized - no customer names)
+const loyalty = analysis.customer_loyalty;
+Plotly.newPlot('customerLoyaltyChart', [{
+    type: 'pie', labels: ['复购客户 (118人)', '单次客户 (703人)'],
+    values: [loyalty.repeat_shipments, loyalty.total_customers - loyalty.repeat_customers > 0 ? (loyalty.total_customers - loyalty.repeat_customers) : 0],
+    hole: 0.5, textinfo: 'label+percent+value',
+    marker: {colors: ['#1565c0', '#e0e0e0']},
+    texttemplate: '%{label}<br>%{value}笔',
+}], {
+    title: {text: '客户复购率分析 (复购率 ' + loyalty.repeat_rate + '%)', font: {size: 14}},
+    margin: {l: 20, r: 20, t: 50, b: 20}, showlegend: false
+}, {responsive: true});
+
+// 20. Parts per shipment
+const pps = Object.entries(analysis.parts_per_shipment_dist);
+Plotly.newPlot('partsPerShipChart', [{
+    type: 'bar', x: pps.map(p => p[0] + '件'), y: pps.map(p => p[1]),
+    marker: {color: pps.map(p => p[0] == 1 ? '#66bb6a' : p[0] == 2 ? '#42a5f5' : '#ef5350')},
+    text: pps.map(p => p[1] + '单'), textposition: 'outside',
+}], {
+    title: {text: '单笔订单包含零件数量分布', font: {size: 14}},
+    xaxis: {title: '零件数量'}, yaxis: {title: '订单数'},
+    margin: {l: 50, r: 20, t: 40, b: 50}
+}, {responsive: true});
+
+// 21. Quarterly
+const quarters = Object.keys(analysis.quarterly).sort();
+Plotly.newPlot('quarterlyChart', [
+    {type: 'bar', x: quarters, y: quarters.map(q => analysis.quarterly[q].ships), name: '件数', marker: {color: '#42a5f5'}, yaxis: 'y'},
+    {type: 'scatter', mode: 'lines+markers', x: quarters, y: quarters.map(q => analysis.quarterly[q].cost), name: '费用($)', line: {color: '#e53935', width: 2}, marker: {size: 7}, yaxis: 'y2'}
+], {
+    title: {text: '季度售后趋势', font: {size: 14}},
+    xaxis: {title: '季度', tickangle: -30}, yaxis: {title: '件数'},
+    yaxis2: {title: '费用($)', side: 'right', overlaying: 'y'},
+    margin: {l: 50, r: 60, t: 40, b: 60}, legend: {x: 0.3, y: 1.1, orientation: 'h'}
+}, {responsive: true});
+
+// 22. High Value Table
+const hvHtml = analysis.high_value_shipments.map(h => 
+    '<tr><td>' + h.date + '</td><td>' + h.state + '</td><td>' + h.carrier + 
+    '</td><td><strong>$' + h.cost.toFixed(2) + '</strong></td><td>' + h.model + 
+    '</td><td>' + (h.parts.join(', ') || 'N/A') + '</td></tr>'
+).join('');
+document.getElementById('highValueTable').innerHTML = hvHtml;
+
+</script>
+</body>
+</html>
