@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
+<html lang="zh-CN"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>自行车零件售后数据分析报告</title>
@@ -46,9 +45,41 @@ table tr:hover{background:#e8eaf6}
 .badge.high{background:#ffebee;color:#c62828}
 .badge.mid{background:#fff3e0;color:#e65100}
 .badge.low{background:#e8f5e9;color:#2e7d32}
+
+/* ===== 密码保护样式 ===== */
+#auth-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1a237e 0%,#283593 50%,#3949ab 100%);z-index:99999;display:flex;align-items:center;justify-content:center}
+.auth-box{background:#fff;border-radius:16px;padding:40px 48px;width:380px;max-width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center}
+.auth-icon{font-size:48px;margin-bottom:12px}
+.auth-title{font-size:20px;font-weight:700;color:#1a237e;margin-bottom:6px}
+.auth-sub{font-size:13px;color:#999;margin-bottom:24px}
+.auth-input{width:100%;padding:14px 18px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;outline:none;transition:border-color .3s;box-sizing:border-box}
+.auth-input:focus{border-color:#3949ab}
+.auth-input.shake{animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.auth-btn{width:100%;padding:14px;margin-top:16px;background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.auth-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,35,126,0.4)}
+.auth-btn:active{transform:translateY(0)}
+.auth-error{color:#e53935;font-size:13px;margin-top:12px;min-height:18px;opacity:0;transition:opacity .3s}
+.auth-error.show{opacity:1}
+.auth-hint{font-size:11px;color:#bbb;margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0}
+.auth-loading{display:inline-block;width:16px;height:16px;border:2px solid #e0e0e0;border-top-color:#3949ab;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-left:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+
+<!-- ===== 密码保护层 ===== -->
+<div id="auth-overlay">
+<div class="auth-box">
+<div class="auth-icon">🔒</div>
+<div class="auth-title">售后数据分析报告</div>
+<div class="auth-sub">请输入访问密码以查看报告内容</div>
+<input type="password" class="auth-input" id="authPassword" placeholder="请输入密码" autocomplete="off" onkeypress="if(event.keyCode===13)checkAuth()">
+<button class="auth-btn" id="authBtn" onclick="checkAuth()">进 入 报 告</button>
+<div class="auth-error" id="authError">密码错误，请重新输入</div>
+<div class="auth-hint">Phoenix 售后数据分析系统 · 内部使用</div>
+</div>
+</div>
 
 <div class="header">
 <h1>🚲 自行车零件售后数据分析报告</h1>
@@ -535,6 +566,77 @@ const hvHtml = analysis.high_value_shipments.map(h =>
 ).join('');
 document.getElementById('highValueTable').innerHTML = hvHtml;
 
+// ===== 密码保护逻辑 =====
+// 密码：Phoenix2026（SHA-256 哈希值，修改密码请更新此哈希）
+const AUTH_HASH = '2f7940858e797c1f905ea6c49e0d8363f25a587ebb9defec8d9d2508bca0a809';
+
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function checkAuth() {
+    const input = document.getElementById('authPassword');
+    const error = document.getElementById('authError');
+    const btn = document.getElementById('authBtn');
+    const password = input.value.trim();
+
+    if (!password) {
+        input.classList.add('shake');
+        setTimeout(() => input.classList.remove('shake'), 400);
+        return;
+    }
+
+    btn.innerHTML = '验证中<span class="auth-loading"></span>';
+    btn.disabled = true;
+
+    try {
+        const hash = await sha256(password);
+        if (hash === AUTH_HASH) {
+            sessionStorage.setItem('auth_ok', '1');
+            const overlay = document.getElementById('auth-overlay');
+            overlay.style.transition = 'opacity .4s ease';
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; }, 400);
+        } else {
+            error.classList.add('show');
+            input.classList.add('shake');
+            input.value = '';
+            setTimeout(() => {
+                input.classList.remove('shake');
+                error.classList.remove('show');
+            }, 2000);
+        }
+    } catch (e) {
+        // Fallback: 如果浏览器不支持 Web Crypto API，使用简单比较
+        if (password === 'Phoenix2026') {
+            sessionStorage.setItem('auth_ok', '1');
+            document.getElementById('auth-overlay').style.display = 'none';
+        } else {
+            error.classList.add('show');
+            input.classList.add('shake');
+            input.value = '';
+            setTimeout(() => { input.classList.remove('shake'); error.classList.remove('show'); }, 2000);
+        }
+    }
+
+    btn.innerHTML = '进 入 报 告';
+    btn.disabled = false;
+}
+
+// 页面加载时检查是否已通过验证
+(function() {
+    if (sessionStorage.getItem('auth_ok') === '1') {
+        document.getElementById('auth-overlay').style.display = 'none';
+    } else {
+        // 聚焦密码输入框
+        setTimeout(() => document.getElementById('authPassword').focus(), 100);
+    }
+})();
+
 </script>
-</body>
-</html>
+
+
+</body></html>
